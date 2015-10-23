@@ -37,12 +37,26 @@ def multiclass_auc(gt, preds):
 
 def class_normalised_accuracy_score(gt, pred, min_class_count=1):
     """
+    Compute class-normalised classification accuracy score
+
     Accuracy done per-class and averaged across all classes.
     This mitigates against the effect of large class imbalance in the test
-    set. However, it can make evaluation sensistive to changes in
-    classification on very infrequent classes - you can use min_class_count
-    to mitigate against this problem
-    Cite: brostow
+    set (see e.g. [1]). However, it can make evaluation sensistive to changes
+    in classification on very infrequent classes - you can use min_class_count
+    to deal with this.
+
+    Parameters
+    ----------
+    gt : array
+        Integers representing ground truth class labels
+    pred : array
+        Integers representing predicted labels
+    min_class_count : integer, optional
+        Ground truth classes with fewer than this number of items in them
+        are ignored in the final computation
+
+    [1] Gabriel J. Brostow, Jamie Shotton, Julien Fauqueur and Roberto Cipolla
+    Segmentation and Recognition using Structure from Motion Point Clouds
     """
     assert gt.shape == pred.shape
 
@@ -59,7 +73,7 @@ def class_normalised_accuracy_score(gt, pred, min_class_count=1):
 
 def plot_roc_curve(gt, pred, label="", plot_midpoint=True):
     """
-    Plots a single roc curve with a dot
+    Plot a single roc curve, optionally with a dot at the 0.5 threshold
     """
 
     # evaluating and finding the curve midpoint
