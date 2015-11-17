@@ -88,9 +88,7 @@ def minibatch_iterator(X, Y, minibatch_size, randomise=False, balanced=False,
 
     '''
     Could use x_preprocessor for data augmentation for example (making use of partial)
-
-
-    '''
+    '''    
     iterator = minibatch_idx_iterator(Y, minibatch_size, randomise, balanced)
 
     if threading:
@@ -99,7 +97,8 @@ def minibatch_iterator(X, Y, minibatch_size, randomise=False, balanced=False,
             balanced=balanced, x_preprocessor=x_preprocessor,
             stitching_function=stitching_function, threading=False)
 
-        return threaded_gen(itr, num_cached)
+        for xx in threaded_gen(itr, num_cached):
+            yield xx
 
     # don't really need the else but keeping for readability
     else:
@@ -110,7 +109,13 @@ def minibatch_iterator(X, Y, minibatch_size, randomise=False, balanced=False,
             Xs = [x_preprocesser(X[idx]) for idx in minibatch_idxs]
 
             # stitching Xs together and returning along with the Ys
-            yield stitching_function(Xs), Y[minibatch_idxs]
+            yield stitching_function(Xs), np.array(Y)[minibatch_idxs]
+
+
+def atleast_nd(arr, n):
+    '''http://stackoverflow.com/a/15942639/279858'''
+    arr.shape += (1,) * (4 - arr.ndim)
+    return arr
 
 
 def form_correct_shape_array(X):
@@ -118,7 +123,7 @@ def form_correct_shape_array(X):
     Given a list of images each of the same size, returns an array of the shape
     and data type (float32) required by Lasagne/Theano
     """
-    im_list = [np.atleast_3d(xx) for xx in X]
+    im_list = [atleast_nd(xx, 4) for xx in X]
     temp = np.concatenate(im_list, 3)
     temp = temp.transpose((3, 2, 0, 1))
     return temp.astype(np.float32)
