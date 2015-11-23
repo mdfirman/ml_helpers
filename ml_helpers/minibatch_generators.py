@@ -88,7 +88,7 @@ def minibatch_iterator(X, Y, minibatch_size, randomise=False, balanced=False,
 
     '''
     Could use x_preprocessor for data augmentation for example (making use of partial)
-    '''    
+    '''
     iterator = minibatch_idx_iterator(Y, minibatch_size, randomise, balanced)
 
     if threading:
@@ -112,8 +112,11 @@ def minibatch_iterator(X, Y, minibatch_size, randomise=False, balanced=False,
             yield stitching_function(Xs), np.array(Y)[minibatch_idxs]
 
 
-def atleast_nd(arr, n):
+def atleast_nd(arr, n, copy=True):
     '''http://stackoverflow.com/a/15942639/279858'''
+    if copy:
+        arr = arr.copy()
+
     arr.shape += (1,) * (4 - arr.ndim)
     return arr
 
