@@ -94,7 +94,7 @@ def minibatch_iterator(X, Y, minibatch_size, randomise=False, balanced=False,
     if threading:
         # return a version of this generator, wrapped in the threading code
         itr = minibatch_iterator(X, Y, minibatch_size, randomise=randomise,
-            balanced=balanced, x_preprocessor=x_preprocessor,
+            balanced=balanced, x_preprocesser=x_preprocesser,
             stitching_function=stitching_function, threading=False)
 
         for xx in threaded_gen(itr, num_cached):
