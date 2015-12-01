@@ -40,7 +40,22 @@ class TablePrinter(object):
     '''
     There are many python ascii table printers on the web, but this is specific
     for a table which is live updated with new numbers as they come in.
-    Prints from a dictionary
+    Prints from a list of dictionaries.
+
+    Example usage:
+
+    results = [{'epoch':1, 'train_loss': 0.3},
+               {'epoch':2, 'train_loss': 0.25, 'val_loss': 0.35},
+               {'epoch':3, 'train_loss': 0.21},
+               {'epoch':4, 'train_loss': 0.20, 'val_loss': 0.32}]
+
+    col_headings = ['epoch', 'train_loss', 'val_loss']
+    tableprinter = TablePrinter(col_headings)
+    tableprinter.print_header()
+
+    for result in results:
+        tableprinter.print_row(result)
+
     '''
     def __init__(self, col_headings, row_width=10, sep='|',
             ignore_missing=True):
