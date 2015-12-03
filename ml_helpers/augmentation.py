@@ -1,9 +1,14 @@
 '''
 A collection of functions to perform augmentations of images, e.g. for
 deep learning algorithms.
+
+Some of these (e.g. randn_crop, random_rotation) assume that we have a
+rectangular region of interest specified on the image.
+
+See examples/augment.py for some usage examples.
 '''
 import numpy as np
-
+from skimage.transform import rotate
 
 def randn_crop(im, top, bottom, left, right, sd=10):
     '''
@@ -93,3 +98,33 @@ def random_colour_transform(im, rgb_eigval, rgb_eigvec, sd=0.003,
         return scaled_im
     else:
         return np.clip(scaled_im, *clip)
+
+
+def random_rotation(im, top, bottom, left, right, all_rotations=False,
+        sd=10):
+    '''
+    Returns a randomly rotated version of im about the centre of the specified
+    crop.
+
+    Parameters:
+    ------------------
+    im:
+        rgb or greysacle image
+    top, bottom, left, right:
+        These specify the region of interest in the image, and are used to
+        rotate the image about the centre of the region of interest
+    all_rotations:
+        If true, rotation angle is uniformly sampled in [0, 360]; otherwise,
+        the angle is sampled from a normal distribution.
+    sd:
+        Standard deviation of the rotation in degrees; only used if
+        all_rotations is False.
+
+    '''
+    if all_rotations:
+        angle = np.random.rand() * 360
+    else:
+        angle = np.random.randn() * sd
+
+    centre = ((left+right)/2, (top + bottom)/2)
+    return rotate(im, angle=angle, resize=False, center=centre, order=1)
