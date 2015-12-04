@@ -70,7 +70,7 @@ def random_flip(im, leftright=True, topbottom=True):
     return im[::lr, ::tb]
 
 
-def random_colour_transform(im, rgb_eigval, rgb_eigvec, sd=0.003,
+def random_colour_transform(im, rgb_eigval, rgb_eigvec, sd=0.1,
         clip=(0, 1.0)):
     '''
     Performs a colourspace warping, according to maybe alexnet (or baidu)

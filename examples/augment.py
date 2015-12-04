@@ -46,6 +46,23 @@ newcrop = {'left': crop['x'],
 cropped_im = \
    im[newcrop['top']:newcrop['bottom'], newcrop['left']:newcrop['right']]
 
+
+def gamma_augmentation(im, sd=0.3, lower_bound=0.1, upper_bound=100.0):
+    gamma = 1.0 + np.random.randn() * sd
+    gamma = np.clip(gamma, lower_bound, upper_bound)
+    return im ** (1.0 / gamma)
+
+
+############################################
+# GAMMA
+tic = time()
+ims = [aug.randn_crop(im, sd=0, **newcrop) for _ in range(24)]
+ims = [gamma_augmentation(im) for im in ims]
+ims = [cropped_im] + ims
+print "Gamma correction took %fs per image" % ((time()-tic)/24.0)
+plot_grid(ims, savepath + 'gamma.png')
+sdsd
+
 ############################################
 # ROTATIONS
 tic = time()
@@ -62,6 +79,7 @@ rgb_eigval, rgb_eigvec = eig(np.cov(rgb_vals - rgb_vals.mean(1)[:, None]))
 rgb_eigvec, rgb_eigval, v = np.linalg.svd(
     rgb_vals - rgb_vals.mean(1)[:, None], full_matrices=False)
 rgb_eigval = np.real(rgb_eigval)
+rgb_eigval /= rgb_eigval.sum()
 
 tic = time()
 ims = [cropped_im] + [aug.random_colour_transform(

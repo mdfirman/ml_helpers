@@ -87,7 +87,8 @@ def minibatch_iterator(X, Y, minibatch_size, randomise=False, balanced=False,
         threading=False, num_cached=128):
 
     '''
-    Could use x_preprocessor for data augmentation for example (making use of partial)
+    Could use x_preprocessor for data augmentation for example (making use of
+    partial)
     '''
     iterator = minibatch_idx_iterator(Y, minibatch_size, randomise, balanced)
 
