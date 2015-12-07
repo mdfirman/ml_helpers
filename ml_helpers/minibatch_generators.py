@@ -9,6 +9,11 @@ def balanced_idxs_iterator(Y, randomise=False):
     returned from each class.
     Every item in the biggest class(es) is returned exactly once.
     Some items from the smaller classes will be shown more than once.
+
+    Parameters:
+    ------------------
+    Y:
+        numpy array of discrete class labels
     '''
     biggest_class_size = np.bincount(Y).max()
 
@@ -30,7 +35,25 @@ def balanced_idxs_iterator(Y, randomise=False):
 
 
 def minibatch_idx_iterator(Y, minibatch_size, randomise, balanced):
+    '''
+    Yields arrays of minibatches, defined by idx positions of the items making
+    up each minibatch.
 
+    Parameters:
+    ------------------
+    Y:
+        Numpy array of discrete class labels. This is used to balance the
+        classes (if required), and to determine the total number of items in
+        the full dataset.
+    minibatch_size:
+        The maximum number of items required in each minibatch
+    randomise:
+        If true, there are two types of randomisation: Which items are in each
+        minibatch, and the order of items in each minibatch
+    balanced:
+        If true, each minibatch will contain roughly equal items from each
+        class
+    '''
     if balanced:
         iterator = balanced_idxs_iterator(Y, randomise)
 
@@ -45,7 +68,8 @@ def minibatch_idx_iterator(Y, minibatch_size, randomise, balanced):
         # the number of items that will be yielded from the iterator
         num_to_iterate = len(Y)
 
-    num_minibatches = int(np.ceil(float(num_to_iterate) / float(minibatch_size)))
+    num_minibatches = int(
+        np.ceil(float(num_to_iterate) / float(minibatch_size)))
 
     for _ in range(num_minibatches):
         # use a trick to ensure we return a partial minibatch at the end...
@@ -53,10 +77,22 @@ def minibatch_idx_iterator(Y, minibatch_size, randomise, balanced):
         yield [idx for idx in idxs if idx is not None]
 
 
-def threaded_gen(generator, num_cached=128):
+def threaded_gen(generator, num_cached=1000):
     '''
     Threaded generator to multithread the data loading pipeline
-    code from daniel, he got it from a chatroom or something...
+    I'm not sure how effective this is for my current setup. I feel I may be
+    better off using multiprocessing or something similar...
+
+    Code from:
+    https://github.com/Lasagne/Lasagne/issues/12#issuecomment-59494251
+
+    Parameters
+    ---------------
+    generator:
+        generator which probably will yield pairs of training data
+    num_cached:
+        How many items to hold in the queue. More items means a higher load
+        on the RAM.
     '''
     import Queue
     queue = Queue.Queue(maxsize=num_cached)
@@ -90,8 +126,6 @@ def minibatch_iterator(X, Y, minibatch_size, randomise=False, balanced=False,
     Could use x_preprocessor for data augmentation for example (making use of
     partial)
     '''
-    iterator = minibatch_idx_iterator(Y, minibatch_size, randomise, balanced)
-
     if threading:
         # return a version of this generator, wrapped in the threading code
         itr = minibatch_iterator(X, Y, minibatch_size, randomise=randomise,
@@ -101,16 +135,16 @@ def minibatch_iterator(X, Y, minibatch_size, randomise=False, balanced=False,
         for xx in threaded_gen(itr, num_cached):
             yield xx
 
-    # don't really need the else but keeping for readability
-    else:
+    # No threading - this code is never reached if threading is used
+    iterator = minibatch_idx_iterator(Y, minibatch_size, randomise, balanced)
 
-        for minibatch_idxs in iterator:
+    for minibatch_idxs in iterator:
 
-            # extracting the Xs, and appling preprocessing (e.g augmentation)
-            Xs = [x_preprocesser(X[idx]) for idx in minibatch_idxs]
+        # extracting the Xs, and apply preprocessing (e.g augmentation)
+        Xs = [x_preprocesser(X[idx]) for idx in minibatch_idxs]
 
-            # stitching Xs together and returning along with the Ys
-            yield stitching_function(Xs), np.array(Y)[minibatch_idxs]
+        # stitching Xs together and returning along with the Ys
+        yield stitching_function(Xs), np.array(Y)[minibatch_idxs]
 
 
 def atleast_nd(arr, n, copy=True):
