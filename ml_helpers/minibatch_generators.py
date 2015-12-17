@@ -126,6 +126,8 @@ def minibatch_iterator(X, Y, minibatch_size, randomise=False, balanced=False,
     Could use x_preprocessor for data augmentation for example (making use of
     partial)
     '''
+    assert len(X) == len(Y)
+
     if threading:
         # return a version of this generator, wrapped in the threading code
         itr = minibatch_iterator(X, Y, minibatch_size, randomise=randomise,
@@ -135,16 +137,18 @@ def minibatch_iterator(X, Y, minibatch_size, randomise=False, balanced=False,
         for xx in threaded_gen(itr, num_cached):
             yield xx
 
-    # No threading - this code is never reached if threading is used
-    iterator = minibatch_idx_iterator(Y, minibatch_size, randomise, balanced)
+    else:
 
-    for minibatch_idxs in iterator:
+        iterator = minibatch_idx_iterator(
+            Y, minibatch_size, randomise, balanced)
 
-        # extracting the Xs, and apply preprocessing (e.g augmentation)
-        Xs = [x_preprocesser(X[idx]) for idx in minibatch_idxs]
+        for minibatch_idxs in iterator:
 
-        # stitching Xs together and returning along with the Ys
-        yield stitching_function(Xs), np.array(Y)[minibatch_idxs]
+            # extracting the Xs, and apply preprocessing (e.g augmentation)
+            Xs = [x_preprocesser(X[idx]) for idx in minibatch_idxs]
+
+            # stitching Xs together and returning along with the Ys
+            yield stitching_function(Xs), np.array(Y)[minibatch_idxs]
 
 
 def atleast_nd(arr, n, copy=True):
@@ -162,6 +166,13 @@ def form_correct_shape_array(X):
     and data type (float32) required by Lasagne/Theano
     """
     im_list = [atleast_nd(xx, 4) for xx in X]
-    temp = np.concatenate(im_list, 3)
+    try:
+        temp = np.concatenate(im_list, 3)
+    except ValueError:
+        print "Could not concatenate arrays correctly"
+        for im in im_list:
+            print im.shape,
+        raise
+
     temp = temp.transpose((3, 2, 0, 1))
     return temp.astype(np.float32)

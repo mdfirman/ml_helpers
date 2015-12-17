@@ -115,8 +115,6 @@ def test_minibatch_iterator():
         all_x += list(tmp_x)
         all_y += list(tmp_y)
 
-    print all_x, X
-    print all_y, Y
     assert all_x == X
     assert all_y == Y
 
@@ -128,6 +126,45 @@ def test_minibatch_iterator2():
         print tmp_x, tmp_y
 
 
+def test_threading():
+    import time
+
+    X = [-1] * 50
+    Y = [0] * 50
+    delay = 0.05
+
+    def augmenter(x):
+        '''
+        Augmenter function which actually just delays for half a second.
+        Imagine this is doing some kind of computationally expensive
+        pre-processing or data augmentation.
+        '''
+        time.sleep(delay)
+        return x
+
+    # doing without threading:
+    tic = time.time()
+    for tmp_x, tmp_y in mbg.minibatch_iterator(
+            X, Y, 1, x_preprocesser=augmenter, threading=False):
+        time.sleep(delay)
+
+    no_thread_time = time.time() - tic
+    print "Without threading", no_thread_time
+
+    # doing with threading:
+    tic = time.time()
+    for tmp_x, tmp_y in mbg.minibatch_iterator(
+            X, Y, 1, x_preprocesser=augmenter, threading=True):
+        time.sleep(delay)
+
+    thread_time = time.time() - tic
+    print "With threading", time.time() - tic
+
+    ratio = no_thread_time / thread_time
+    print ratio
+    print np.abs(ratio - 2.0)
+    assert np.abs(ratio - 2.0) < 0.05
+
 
 #
 #
@@ -137,3 +174,4 @@ def test_minibatch_iterator2():
 # test_imbalanced_minibatch_idx_iterator()
 test_minibatch_iterator()
 test_minibatch_iterator2()
+test_threading()
