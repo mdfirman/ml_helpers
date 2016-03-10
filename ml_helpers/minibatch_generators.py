@@ -2,6 +2,13 @@ import numpy as np
 import itertools
 
 
+def largest_class_size(y):
+    '''
+    Like np.bincount(xx).max(), but works for structured arrays too
+    '''
+    return max([np.sum(y == yy) for yy in np.unique(y)])
+
+
 def balanced_idxs_iterator(Y, randomise=False):
     '''
     Iterates over the index positions in Y, such that at the end
@@ -15,7 +22,7 @@ def balanced_idxs_iterator(Y, randomise=False):
     Y:
         numpy array of discrete class labels
     '''
-    biggest_class_size = np.bincount(Y).max()
+    biggest_class_size = largest_class_size(Y)
 
     # create a cyclic generator for each class
     generators = {}
@@ -25,7 +32,7 @@ def balanced_idxs_iterator(Y, randomise=False):
         if randomise:
             idxs = np.random.permutation(idxs)
 
-        generators[class_label] = itertools.cycle(idxs)
+        generators[tuple(class_label)] = itertools.cycle(idxs)
 
     # number of loops is defined by the largest class size
     for _ in range(biggest_class_size):
@@ -58,7 +65,7 @@ def minibatch_idx_iterator(Y, minibatch_size, randomise, balanced):
         iterator = balanced_idxs_iterator(Y, randomise)
 
         # the number of items that will be yielded from the iterator
-        num_to_iterate = np.bincount(Y).max() * np.bincount(Y).shape[0]
+        num_to_iterate = largest_class_size(Y) * np.unique(Y).shape[0]
     else:
         if randomise:
             iterator = iter(np.random.permutation(xrange(len(Y))))

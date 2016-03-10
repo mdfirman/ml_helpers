@@ -57,24 +57,30 @@ class TablePrinter(object):
         tableprinter.print_row(result)
 
     '''
-    def __init__(self, col_headings, row_width=10, sep='|',
+    def __init__(self, col_headings, row_widths=10, sep='|',
             ignore_missing=True):
         self.col_headings = col_headings
-        self.row_width = row_width
         self.n_cols = len(col_headings)
         self.sep = sep
         self.ignore_missing = ignore_missing
+
+        if hasattr(row_widths, '__iter__'):
+            self.row_widths = row_widths
+        else:
+            self.row_widths = [row_widths] * len(col_headings)
+
+        assert(len(self.row_widths) == len(col_headings))
 
     def print_header(self):
         '''Prints column headings, modifying the strings to look a bit nicer'''
 
         r = '\n' + self.sep + ' '
 
-        for heading in self.col_headings:
+        for heading, width in zip(self.col_headings, self.row_widths):
             title = heading.strip().replace('_', ' ').capitalize()
-            r += title.ljust(self.row_width) +  ' ' + self.sep + ' '
+            r += title.ljust(width) +  ' ' + self.sep + ' '
 
-        r += '\n' + '-' * ((self.row_width + 3) * self.n_cols + 1)
+        r += '\n' + '-' * (sum(self.row_widths) + 3 * len(self.row_widths) + 1)
         print r
 
     def _str_repr(self, item):
@@ -90,6 +96,10 @@ class TablePrinter(object):
             return "%0.4f" % item
         elif type(item) is int:
             return "%6d" % item
+        elif item is None:
+            return "None"
+        else:
+            return str(item)
 
     def print_row(self, data, print_header=False):
         '''Prints a single row of results to screen'''
@@ -98,12 +108,12 @@ class TablePrinter(object):
             self.print_header()
 
         r = self.sep + ' '
-        for heading in self.col_headings:
+        for heading, width in zip(self.col_headings, self.row_widths):
             if self.ignore_missing and heading not in data:
                 item = '---'
             else:
                 item = data[heading]
 
-            r += self._str_repr(item).ljust(self.row_width) + ' | '
+            r += self._str_repr(item).center(width) + ' | '
 
         print r
