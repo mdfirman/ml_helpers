@@ -65,8 +65,8 @@ def random_flip(im, leftright=True, topbottom=True):
     leftright, topbottom:
         booleans dictating what the permissable flips are
     '''
-    lr = int(leftright and np.random.rand() < 0.5) * 2 - 1
-    tb = int(topbottom and np.random.rand() < 0.5) * 2 - 1
+    lr = int(leftright and np.random.rand() < 0.5) * -2 + 1
+    tb = int(topbottom and np.random.rand() < 0.5) * -2 + 1
     return im[::lr, ::tb]
 
 
