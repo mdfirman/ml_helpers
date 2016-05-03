@@ -92,3 +92,28 @@ def plot_roc_curve(gt, pred, label="", plot_midpoint=True):
     plt.legend(loc='best')
     plt.xlabel('FPR')
     plt.ylabel('TPR')
+
+
+def top_n_accuracy(gt, pred, n):
+    """
+    Computes the fraction of items which have the correct answer in the top
+    n predictions made by a classifier.
+
+    Parameters
+    ----------
+    gt : array
+        Integers representing ground truth class labels
+    pred : array
+        Matrix representing class probabilities as predicted by a classifer
+    n : integer
+        If the ground truth is in the top n prediction of the classifier,
+        the item is counted as a successful prediction
+    """
+    sorted_preds = np.argsort(pred, axis=1)[:, ::-1][:, :n]
+
+    successes = 0
+    for pred_classes, ground_truth_class in zip(sorted_preds, gt):
+        if ground_truth_class in pred_classes:
+            successes += 1
+
+    return float(successes) / len(gt)
