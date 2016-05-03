@@ -2,6 +2,16 @@ import numpy as np
 import itertools
 
 
+def force_immutable(item):
+    '''
+    Forces mutable items to be immutable
+    '''
+    if hasattr(item, '__next__'):
+        return tuple(item)
+    else:
+        return item
+
+
 def largest_class_size(y):
     '''
     Like np.bincount(xx).max(), but works for structured arrays too
@@ -32,7 +42,7 @@ def balanced_idxs_iterator(Y, randomise=False):
         if randomise:
             idxs = np.random.permutation(idxs)
 
-        generators[tuple(class_label)] = itertools.cycle(idxs)
+        generators[force_immutable(class_label)] = itertools.cycle(idxs)
 
     # number of loops is defined by the largest class size
     for _ in range(biggest_class_size):
