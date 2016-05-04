@@ -173,7 +173,7 @@ def plot_confusion_matrix(y_true, y_pred, title='Confusion matrix',
         y_pred = np.argmax(y_pred, axis=1)
 
     # compute confusion matrix
-    cm = metrics.confusion_matrix(y_pred, y_true)
+    cm = metrics.confusion_matrix(y_true, y_pred)
 
     if normalise:
         cm = cm.astype(float)
