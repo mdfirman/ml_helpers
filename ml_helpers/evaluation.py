@@ -141,3 +141,57 @@ def top_n_accuracy(y_true, y_pred, n, summarize=True):
         return np.mean(successes)
     else:
         return successes
+
+
+def plot_confusion_matrix(y_true, y_pred, title='Confusion matrix',
+        cmap=plt.cm.Blues, normalise=False):
+    """
+    Plot a confusion matrix using matplotlib. The matrix is computed using
+    sklearn.metrics.confusion_matrix. Rows are ground truth labels; columns are
+    predictions.
+
+    Code adapted from:
+    http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
+
+    Parameters
+    ----------
+    y_true : array
+        Integers representing ground truth class labels
+    y_pred : array
+        Either an array of classifier predictions, where columns correspond
+        to classes and rows to data instances, or an array of size of y_true
+        where each integer represents predicted class label
+    title : string
+        Title to be provided for the plot
+    cmap : matplotlib colourmap
+        Colourmap used for the plot
+    normalise : boolean
+        If true, each row is normalised to sum to one. Otherwise, each entry in
+        confusion matrix is an integer.
+    """
+    if y_pred.ndim == 2:
+        y_pred = np.argmax(y_pred, axis=1)
+
+    # compute confusion matrix
+    cm = metrics.confusion_matrix(y_pred, y_true)
+
+    if normalise:
+        cm = cm.astype(float)
+        cm /= cm.sum(axis=1, keepdims=True)
+
+    # plotting and formatting plot
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar(fraction=0.046, pad=0.04)
+
+    tick_marks = np.arange(len(unique_labels))
+    plt.xticks(tick_marks, unique_labels, rotation=75)
+    plt.yticks(tick_marks, unique_labels)
+
+    plt.tight_layout()
+
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+
+    if normalise:
+        plt.clim(0, 1.0)
