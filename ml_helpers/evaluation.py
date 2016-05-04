@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn import metrics
+from sklearn.metrics.classification import _check_targets
 import matplotlib.pyplot as plt
 
 
@@ -36,7 +37,8 @@ def multiclass_auc(gt, preds):
     return np.average(np.array(aucs), weights=np.array(weights))
 
 
-def class_normalised_accuracy_score(gt, pred, min_class_count=1):
+def class_normalised_accuracy_score(y_true, y_pred, min_class_count=1,
+        classes_to_use=None):
     """
     Compute class-normalised classification accuracy score
 
@@ -48,26 +50,32 @@ def class_normalised_accuracy_score(gt, pred, min_class_count=1):
 
     Parameters
     ----------
-    gt : array
+    y_true : array
         Integers representing ground truth class labels
-    pred : array
-        Integers representing predicted labels
+    y_pred : array
+        Integers representing predicted labels, or array of probabilities
     min_class_count : integer, optional
         Ground truth classes with fewer than this number of items in them
-        are ignored in the final computation
+        are ignored in the final computation. If classes_to_use is provided,
+        then this argument is ignored
+    classes_to_use : array
+        Integers representing which classes to include in accuracy score.
+        Over-rules min_class_count
 
     [1] Gabriel J. Brostow, Jamie Shotton, Julien Fauqueur and Roberto Cipolla
     Segmentation and Recognition using Structure from Motion Point Clouds
     """
-    assert gt.shape == pred.shape
+    assert len(y_true) == len(y_pred)
+    if y_pred.ndim == 2:
+        y_pred = np.argmax(y_pred, axis=1)
 
     accs = []
-    for target in np.unique(gt):
-        idxs = gt == target
+    for target in np.unique(y_true):
+        idxs = y_true == target
 
         # only include if we have enough ground truth classes
         if idxs.sum() >= min_class_count:
-            accs.append(metrics.accuracy_score(gt[idxs], pred[idxs]))
+            accs.append(metrics.accuracy_score(y_true[idxs], y_pred[idxs]))
 
     return np.mean(accs)
 
@@ -94,26 +102,26 @@ def plot_roc_curve(gt, pred, label="", plot_midpoint=True):
     plt.ylabel('TPR')
 
 
-def top_n_accuracy(gt, pred, n):
+def top_n_accuracy(y_true, y_pred, n, summarize=True):
     """
     Computes the fraction of items which have the correct answer in the top
     n predictions made by a classifier.
 
     Parameters
     ----------
-    gt : array
+    y_true : array
         Integers representing ground truth class labels
-    pred : array
+    y_pred : array
         Matrix representing class probabilities as predicted by a classifer
     n : integer
         If the ground truth is in the top n prediction of the classifier,
         the item is counted as a successful prediction
     """
-    sorted_preds = np.argsort(pred, axis=1)[:, ::-1][:, :n]
+    y_pred_sorted = np.argsort(y_pred, axis=1)[:, ::-1][:, :n]
 
-    successes = 0
-    for pred_classes, ground_truth_class in zip(sorted_preds, gt):
-        if ground_truth_class in pred_classes:
-            successes += 1
+    successes = [gt in pred for pred, gt in zip(y_pred_sorted, y_true)]
 
-    return float(successes) / len(gt)
+    if summarize:
+        return np.mean(successes)
+    else:
+        return successes
