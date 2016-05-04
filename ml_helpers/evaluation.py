@@ -144,7 +144,7 @@ def top_n_accuracy(y_true, y_pred, n, summarize=True):
 
 
 def plot_confusion_matrix(y_true, y_pred, title='Confusion matrix',
-        cmap=plt.cm.Blues, normalise=False):
+        cls_labels=None, cmap=plt.cm.Blues, normalise=False):
     """
     Plot a confusion matrix using matplotlib. The matrix is computed using
     sklearn.metrics.confusion_matrix. Rows are ground truth labels; columns are
@@ -161,11 +161,13 @@ def plot_confusion_matrix(y_true, y_pred, title='Confusion matrix',
         Either an array of classifier predictions, where columns correspond
         to classes and rows to data instances, or an array of size of y_true
         where each integer represents predicted class label
-    title : string
+    title : string, optional
         Title to be provided for the plot
-    cmap : matplotlib colourmap
+    cls_labels : list, optional
+        A list of strings to use as the tick labels.
+    cmap : matplotlib colourmap, optional
         Colourmap used for the plot
-    normalise : boolean
+    normalise : boolean, optional
         If true, each row is normalised to sum to one. Otherwise, each entry in
         confusion matrix is an integer.
     """
@@ -184,9 +186,10 @@ def plot_confusion_matrix(y_true, y_pred, title='Confusion matrix',
     plt.title(title)
     plt.colorbar(fraction=0.046, pad=0.04)
 
-    tick_marks = np.arange(len(unique_labels))
-    plt.xticks(tick_marks, unique_labels, rotation=75)
-    plt.yticks(tick_marks, unique_labels)
+    if cls_labels:
+        tick_marks = np.arange(len(cls_labels))
+        plt.xticks(tick_marks, cls_labels, rotation=75)
+        plt.yticks(tick_marks, cls_labels)
 
     plt.tight_layout()
 
