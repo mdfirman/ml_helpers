@@ -18,7 +18,6 @@ def multiclass_auc(gt, preds):
 
     [1] https://ccrma.stanford.edu/workshops/mir2009/references/ROCintro.pdf
     """
-
     assert gt.shape[0] == preds.shape[0]
     assert gt.max() < preds.shape[1]
 
@@ -38,7 +37,7 @@ def multiclass_auc(gt, preds):
 
 
 def class_normalised_accuracy_score(y_true, y_pred, min_class_count=1,
-        classes_to_use=None):
+        accuracy_function=metrics.accuracy_score):
     """
     Compute class-normalised classification accuracy score
 
@@ -56,17 +55,31 @@ def class_normalised_accuracy_score(y_true, y_pred, min_class_count=1,
         Integers representing predicted labels, or array of probabilities
     min_class_count : integer, optional
         Ground truth classes with fewer than this number of items in them
-        are ignored in the final computation. If classes_to_use is provided,
-        then this argument is ignored
-    classes_to_use : array
-        Integers representing which classes to include in accuracy score.
-        Over-rules min_class_count
+        are ignored in the final computation.
+    accuracy_function : function
+        A function which accepts (y_true, y_pred) as arguments and returns
+        a scalar accuracy score. By default, is simply the fraction of
+        classes correct, as implemented by metrics.accuracy_score.
+        However, could be top5 accuracy etc. e.g.:
+
+        >>> from ml_helpers import evaluation
+        >>> from functools import partial
+        >>> top2 = partial(evaluation.top_n_accuracy, n=2)
+        >>> ground_truth = [1, 2, 2]
+        >>> preds = np.array([[0.2, 0.8, 0.0],
+                              [0.0, 0.6, 0.4],
+                              [0.0, 0.0, 1.0]])
+        >>> evaluation.class_normalised_accuracy_score(
+                ground_truth, preds, accuracy_function=top2)
 
     [1] Gabriel J. Brostow, Jamie Shotton, Julien Fauqueur and Roberto Cipolla
     Segmentation and Recognition using Structure from Motion Point Clouds
     """
-    assert len(y_true) == len(y_pred)
-    if y_pred.ndim == 2:
+    y_true = np.asarray(y_true)
+    assert y_true.shape[0] == y_pred.shape[0]
+
+    # for sklearn, we can't have y_true as an integer list if y_pred is array
+    if y_pred.ndim == 2 and accuracy_function == metrics.accuracy_score:
         y_pred = np.argmax(y_pred, axis=1)
 
     accs = []
@@ -75,7 +88,7 @@ def class_normalised_accuracy_score(y_true, y_pred, min_class_count=1,
 
         # only include if we have enough ground truth classes
         if idxs.sum() >= min_class_count:
-            accs.append(metrics.accuracy_score(y_true[idxs], y_pred[idxs]))
+            accs.append(accuracy_function(y_true[idxs], y_pred[idxs]))
 
     return np.mean(accs)
 
@@ -90,7 +103,7 @@ def plot_roc_curve(gt, pred, label="", plot_midpoint=True):
     roc_auc = metrics.auc(fpr, tpr)
 
     # plotting curve
-    plt.plot(fpr, tpr , label='%s (area = %0.2f)' % (label, roc_auc))
+    plt.plot(fpr, tpr, label='%s (area = %0.2f)' % (label, roc_auc))
 
     if plot_midpoint:
         mid_idx = np.argmin(np.abs(thresh-0.5))
@@ -117,6 +130,9 @@ def top_n_accuracy(y_true, y_pred, n, summarize=True):
         If the ground truth is in the top n prediction of the classifier,
         the item is counted as a successful prediction
     """
+    assert len(y_true) == y_pred.shape[0]
+    assert max(y_true) < y_pred.shape[1]
+
     y_pred_sorted = np.argsort(y_pred, axis=1)[:, ::-1][:, :n]
 
     successes = [gt in pred for pred, gt in zip(y_pred_sorted, y_true)]
