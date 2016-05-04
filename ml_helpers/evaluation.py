@@ -36,7 +36,7 @@ def multiclass_auc(gt, preds):
     return np.average(np.array(aucs), weights=np.array(weights))
 
 
-def class_normalised_accuracy_score(y_true, y_pred, min_class_count=1,
+def class_normalised_accuracy(y_true, y_pred, min_class_count=1,
         accuracy_function=metrics.accuracy_score):
     """
     Compute class-normalised classification accuracy score
@@ -69,7 +69,7 @@ def class_normalised_accuracy_score(y_true, y_pred, min_class_count=1,
         >>> preds = np.array([[0.2, 0.8, 0.0],
                               [0.0, 0.6, 0.4],
                               [0.0, 0.0, 1.0]])
-        >>> evaluation.class_normalised_accuracy_score(
+        >>> evaluation.class_normalised_accuracy(
                 ground_truth, preds, accuracy_function=top2)
 
     [1] Gabriel J. Brostow, Jamie Shotton, Julien Fauqueur and Roberto Cipolla

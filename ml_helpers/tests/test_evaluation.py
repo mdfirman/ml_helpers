@@ -22,11 +22,11 @@ def test_normalised_accuracy():
                       [0.0, 0.0, 1.0],
                       [0.9, 0.0, 0.1]])
 
-    acc = evaluation.class_normalised_accuracy_score(
+    acc = evaluation.class_normalised_accuracy(
         ground_truth, preds, accuracy_function=top2acc)
     assert acc == 1.0
 
-    acc = evaluation.class_normalised_accuracy_score(ground_truth, preds)
+    acc = evaluation.class_normalised_accuracy(ground_truth, preds)
     assert acc == 0.5
 
 
