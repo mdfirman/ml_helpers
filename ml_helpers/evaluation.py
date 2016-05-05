@@ -144,7 +144,7 @@ def top_n_accuracy(y_true, y_pred, n, summarize=True):
 
 
 def plot_confusion_matrix(y_true, y_pred, title='Confusion matrix',
-        cls_labels=None, cmap=plt.cm.Blues, normalise=False):
+        cls_labels=None, cmap=plt.cm.Blues, normalise=False, grid=True):
     """
     Plot a confusion matrix using matplotlib. The matrix is computed using
     sklearn.metrics.confusion_matrix. Rows are ground truth labels; columns are
@@ -170,12 +170,17 @@ def plot_confusion_matrix(y_true, y_pred, title='Confusion matrix',
     normalise : boolean, optional
         If true, each row is normalised to sum to one. Otherwise, each entry in
         confusion matrix is an integer.
+    grid : boolean, options
+        If true, plots a faint grey grid on the confusion matrix image.
+        This is offset 0.5 from standard tick points, so we don't use
+        matplotlib ticks here.
     """
     if y_pred.ndim == 2:
         y_pred = np.argmax(y_pred, axis=1)
 
     # compute confusion matrix
     cm = metrics.confusion_matrix(y_true, y_pred)
+    N = cm.shape[0]
 
     if normalise:
         cm = cm.astype(float)
@@ -188,13 +193,27 @@ def plot_confusion_matrix(y_true, y_pred, title='Confusion matrix',
 
     if cls_labels:
         tick_marks = np.arange(len(cls_labels))
-        plt.xticks(tick_marks, cls_labels, rotation=75)
+        plt.xticks(tick_marks, cls_labels, rotation=90)
         plt.yticks(tick_marks, cls_labels)
+
+    if grid:
+        # remove standard ticks
+        plt.tick_params(axis='x', which='both', bottom='off', top='off')
+        plt.tick_params(axis='y', which='both', left='off', right='off')
+
+        # add grid
+        params = {'color': [0.8, 0.8, 0.8], 'linewidth': 1}
+        for row in range(N-1):
+            plt.plot((-0.5, N), (row + 0.5, row + 0.5), **params)
+            plt.plot((row + 0.5, row + 0.5), (-0.5, N), **params)
 
     plt.tight_layout()
 
     plt.ylabel('True label')
     plt.xlabel('Predicted label')
+
+    plt.xlim(-0.5, float(N) - 0.5)
+    plt.ylim(float(N) - 0.5, -0.5)
 
     if normalise:
         plt.clim(0, 1.0)
