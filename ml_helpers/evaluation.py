@@ -179,7 +179,11 @@ def plot_confusion_matrix(y_true, y_pred, title='Confusion matrix',
         y_pred = np.argmax(y_pred, axis=1)
 
     # compute confusion matrix
-    cm = metrics.confusion_matrix(y_true, y_pred)
+    if cls_labels:
+        # this is useful if not all classes are present in y_true/y_pred
+        cm = metrics.confusion_matrix(y_true, y_pred, range(len(cls_labels)))
+    else:
+        cm = metrics.confusion_matrix(y_true, y_pred)
     N = cm.shape[0]
 
     if normalise:
