@@ -191,6 +191,7 @@ def plot_confusion_matrix(y_true, y_pred, title='Confusion matrix',
         cm /= cm.sum(axis=1, keepdims=True)
 
     # plotting and formatting plot
+    plt.clf()
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
     plt.colorbar(fraction=0.046, pad=0.04)
@@ -199,6 +200,9 @@ def plot_confusion_matrix(y_true, y_pred, title='Confusion matrix',
         tick_marks = np.arange(len(cls_labels))
         plt.xticks(tick_marks, cls_labels, rotation=90)
         plt.yticks(tick_marks, cls_labels)
+
+    if normalise:
+        plt.clim(0.0, 1.0)
 
     if grid:
         # remove standard ticks
