@@ -1,5 +1,6 @@
 import numpy as np
 import itertools
+import numbers
 
 
 def force_immutable(item):
@@ -13,27 +14,39 @@ def force_immutable(item):
         return tuple(item)
 
 
-def largest_class_size(y):
+def get_class_size(y, using):
     '''
     Like np.bincount(xx).max(), but works for structured arrays too
     '''
-    return max([np.sum(y == yy) for yy in np.unique(y)])
+    if isinstance(using, numbers.Number):
+        return using
+    elif using == 'largest':
+        return max([np.sum(y == yy) for yy in np.unique(y)])
+    elif using == 'smallest':
+        return min([np.sum(y == yy) for yy in np.unique(y)])
+
+    raise Exception('Unknown balance_using, %s' % using)
 
 
-def balanced_idxs_iterator(Y, randomise=False):
+def balanced_idxs_iterator(Y, randomise=False, class_size='largest'):
     '''
     Iterates over the index positions in Y, such that at the end
     of a complete iteration the same number of items will have been
     returned from each class.
-    Every item in the biggest class(es) is returned exactly once.
+    By default, every item in the biggest class(es) is returned exactly once.
     Some items from the smaller classes will be shown more than once.
 
     Parameters:
     ------------------
     Y:
         numpy array of discrete class labels
+    randomise:
+        boolean, if true then idxs are returned in random order
+    class_size:
+        Which class to use to balance. Choices are 'largest' and 'smallest',
+        or an integer
     '''
-    biggest_class_size = largest_class_size(Y)
+    class_size_to_use = get_class_size(Y, class_size)
 
     # create a cyclic generator for each class
     generators = {}
@@ -46,13 +59,14 @@ def balanced_idxs_iterator(Y, randomise=False):
         generators[force_immutable(class_label)] = itertools.cycle(idxs)
 
     # number of loops is defined by the largest class size
-    for _ in range(biggest_class_size):
+    for _ in range(class_size_to_use):
         for generator in generators.itervalues():
             data_idx = generator.next()
             yield data_idx
 
 
-def minibatch_idx_iterator(Y, minibatch_size, randomise, balanced):
+def minibatch_idx_iterator(
+        Y, minibatch_size, randomise, balanced, class_size='largest'):
     '''
     Yields arrays of minibatches, defined by idx positions of the items making
     up each minibatch.
@@ -71,12 +85,16 @@ def minibatch_idx_iterator(Y, minibatch_size, randomise, balanced):
     balanced:
         If true, each minibatch will contain roughly equal items from each
         class
+    class_size:
+        Which class to use to balance. Choices are 'largest' and 'smallest',
+        or can be an integer specifying number of items of each class
+        to use in each epoch.
     '''
     if balanced:
-        iterator = balanced_idxs_iterator(Y, randomise)
+        iterator = balanced_idxs_iterator(Y, randomise, class_size)
 
         # the number of items that will be yielded from the iterator
-        num_to_iterate = largest_class_size(Y) * np.unique(Y).shape[0]
+        num_to_iterate = get_class_size(Y, class_size) * np.unique(Y).shape[0]
     else:
         if randomise:
             iterator = iter(np.random.permutation(xrange(len(Y))))
@@ -137,8 +155,9 @@ def threaded_gen(generator, num_cached=1000):
 
 
 def minibatch_iterator(X, Y, minibatch_size, randomise=False, balanced=False,
-        x_preprocesser=lambda x:x, stitching_function=lambda x: np.array(x),
-        threading=False, num_cached=128):
+        class_size='largest', x_preprocesser=lambda x:x,
+        stitching_function=lambda x: np.array(x), threading=False,
+        num_cached=128):
 
     '''
     Could use x_preprocessor for data augmentation for example (making use of
@@ -149,7 +168,8 @@ def minibatch_iterator(X, Y, minibatch_size, randomise=False, balanced=False,
     if threading:
         # return a version of this generator, wrapped in the threading code
         itr = minibatch_iterator(X, Y, minibatch_size, randomise=randomise,
-            balanced=balanced, x_preprocesser=x_preprocesser,
+            balanced=balanced, class_size=class_size,
+            x_preprocesser=x_preprocesser,
             stitching_function=stitching_function, threading=False)
 
         for xx in threaded_gen(itr, num_cached):
@@ -158,7 +178,7 @@ def minibatch_iterator(X, Y, minibatch_size, randomise=False, balanced=False,
     else:
 
         iterator = minibatch_idx_iterator(
-            Y, minibatch_size, randomise, balanced)
+            Y, minibatch_size, randomise, balanced, class_size)
 
         for minibatch_idxs in iterator:
 
