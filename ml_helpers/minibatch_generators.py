@@ -6,10 +6,11 @@ def force_immutable(item):
     '''
     Forces mutable items to be immutable
     '''
-    if hasattr(item, '__next__'):
-        return tuple(item)
-    else:
+    try:
+        hash(item)
         return item
+    except:
+        return tuple(item)
 
 
 def largest_class_size(y):

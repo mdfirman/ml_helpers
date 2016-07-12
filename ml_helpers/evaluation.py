@@ -179,7 +179,7 @@ def plot_confusion_matrix(y_true, y_pred, title='Confusion matrix',
         y_pred = np.argmax(y_pred, axis=1)
 
     # compute confusion matrix
-    if cls_labels:
+    if cls_labels is not None:
         # this is useful if not all classes are present in y_true/y_pred
         cm = metrics.confusion_matrix(y_true, y_pred, range(len(cls_labels)))
     else:
@@ -196,7 +196,7 @@ def plot_confusion_matrix(y_true, y_pred, title='Confusion matrix',
     plt.title(title)
     plt.colorbar(fraction=0.046, pad=0.04)
 
-    if cls_labels:
+    if cls_labels is not None:
         tick_marks = np.arange(len(cls_labels))
         plt.xticks(tick_marks, cls_labels, rotation=90)
         plt.yticks(tick_marks, cls_labels)

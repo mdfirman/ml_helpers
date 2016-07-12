@@ -92,7 +92,7 @@ def random_colour_transform(im, rgb_eigval, rgb_eigvec, sd=0.1,
     '''
     alpha = np.random.randn(3) * sd
     scale_factor = alpha * np.real(rgb_eigval)
-    scaled_im = im + rgb_eigvec.dot(scale_factor)[None, None, :]
+    scaled_im = im + rgb_eigvec.dot(scale_factor)[:, None, None]
 
     if clip is None:
         return scaled_im
