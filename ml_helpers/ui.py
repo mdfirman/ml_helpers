@@ -117,3 +117,25 @@ class TablePrinter(object):
             r += self._str_repr(item).center(width) + ' | '
 
         print r
+
+
+class Logger(object):
+    '''
+    Allows printing to both screen and to a file.
+    http://stackoverflow.com/a/14906787/279858
+
+    Usage:
+    >> import sys
+    >> sys.stdout = Logger('log.txt')
+    '''
+    def __init__(self, fname):
+        self.terminal = sys.stdout
+        self.log = open(fname, "a")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+    def flush(self):
+        #this flush method is needed for python 3 compatibility.
+        pass
