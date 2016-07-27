@@ -139,3 +139,16 @@ class Logger(object):
     def flush(self):
         #this flush method is needed for python 3 compatibility.
         pass
+
+
+def color_grid_vis(X, (nh, nw), save_path=None):
+    '''https://github.com/Newmu/dcgan_code'''
+    h, w = X[0].shape[:2]
+    img = np.zeros((h*nh, w*nw, 3))
+    for n, x in enumerate(X):
+        j = n/nw
+        i = n%nw
+        img[j*h:j*h+h, i*w:i*w+w, :] = x
+    if save_path is not None:
+        imsave(save_path, img)
+    return img
