@@ -74,9 +74,11 @@ def minibatch_idx_iterator(
     Parameters:
     ------------------
     Y:
-        Numpy array of discrete class labels. This is used to balance the
+        Either: Numpy array of discrete class labels. This is used to balance the
         classes (if required), and to determine the total number of items in
         the full dataset.
+        Or: Scalar representing number of items in dataset.
+        If balanced is true, then this must be a numpy array of labels.
     minibatch_size:
         The maximum number of items required in each minibatch
     randomise:
@@ -96,13 +98,16 @@ def minibatch_idx_iterator(
         # the number of items that will be yielded from the iterator
         num_to_iterate = get_class_size(Y, class_size) * np.unique(Y).shape[0]
     else:
-        if randomise:
-            iterator = iter(np.random.permutation(xrange(len(Y))))
-        else:
-            iterator = iter(range(len(Y)))
-
         # the number of items that will be yielded from the iterator
-        num_to_iterate = len(Y)
+        if isinstance(Y, numbers.Number):
+            num_to_iterate = Y
+        else:
+            num_to_iterate = len(Y)
+
+        if randomise:
+            iterator = iter(np.random.permutation(xrange(num_to_iterate)))
+        else:
+            iterator = iter(range(num_to_iterate))
 
     num_minibatches = int(
         np.ceil(float(num_to_iterate) / float(minibatch_size)))
