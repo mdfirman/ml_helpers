@@ -59,7 +59,7 @@ tic = time()
 ims = [aug.randn_crop(im, sd=0, **newcrop) for _ in range(24)]
 ims = [gamma_augmentation(im) for im in ims]
 ims = [cropped_im] + ims
-print "Gamma correction took %fs per image" % ((time()-tic)/24.0)
+print("Gamma correction took %fs per image" % ((time()-tic)/24.0))
 plot_grid(ims, savepath + 'gamma.png')
 sdsd
 
@@ -69,7 +69,7 @@ tic = time()
 rots = [aug.random_rotation(im, sd=10, **newcrop) for _ in range(24)]
 rots = [aug.randn_crop(im, sd=0, **newcrop) for im in rots]
 ims = [cropped_im] + rots
-print "Rotating took %fs per image" % ((time()-tic)/24.0)
+print("Rotating took %fs per image" % ((time()-tic)/24.0))
 plot_grid(ims, savepath + 'rotations.png')
 
 ############################################
@@ -84,21 +84,21 @@ rgb_eigval /= rgb_eigval.sum()
 tic = time()
 ims = [cropped_im] + [aug.random_colour_transform(
     cropped_im, rgb_eigval, rgb_eigvec) for _ in range(24)]
-print "Colour transform took %fs per image" % ((time()-tic)/24.0)
+print("Colour transform took %fs per image" % ((time()-tic)/24.0))
 plot_grid(ims, savepath + 'cols.png')
 
 ############################################
 # NORMS
 tic = time()
 ims = [cropped_im for _ in range(25)]
-print "No augmentation took %fs per image" % ((time()-tic)/24.0)
+print("No augmentation took %fs per image" % ((time()-tic)/24.0))
 plot_grid(ims, savepath + 'norms.png')
 
 ############################################
 # CROPS
 tic = time()
 ims = [cropped_im] + [aug.randn_crop(im, sd=10, **newcrop) for _ in range(24)]
-print "Randn cropping took %fs per image" % ((time()-tic)/24.0)
+print("Randn cropping took %fs per image" % ((time()-tic)/24.0))
 plot_grid(ims, savepath + 'crops.png')
 
 ############################################
@@ -106,14 +106,14 @@ plot_grid(ims, savepath + 'crops.png')
 tic = time()
 resized_im = imresize(cropped_im, (256, 256))
 ims = [cropped_im] + [aug.random_crop(resized_im) for _ in range(24)]
-print "Alexnet cropping took %fs per image" % ((time()-tic)/24.0)
+print("Alexnet cropping took %fs per image" % ((time()-tic)/24.0))
 plot_grid(ims, savepath + 'alexnet_crops.png')
 
 ############################################
 # FLIPS
 tic = time()
 ims = [cropped_im] + [aug.random_flip(cropped_im) for _ in range(24)]
-print "Flipping took %fs per image" % ((time()-tic)/24.0)
+print("Flipping took %fs per image" % ((time()-tic)/24.0))
 plot_grid(ims, savepath + 'flips.png')
 
 ############################################
@@ -127,5 +127,5 @@ def full_trans(im):
     return imresize(coloured, (256, 256))
 
 ims = [cropped_im] + [full_trans(im) for _ in range(24)]
-print "Full transform took %fs per image" % ((time()-tic)/24.0)
+print("Full transform took %fs per image" % ((time()-tic)/24.0))
 plot_grid(ims, savepath + 'full.png')

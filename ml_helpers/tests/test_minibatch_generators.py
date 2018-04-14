@@ -123,7 +123,7 @@ def test_minibatch_iterator2():
     X = [-1, -2, -3, -4, -5, -6, -7]
     Y = [0, 1, 1, 2, 2, 2, 5]
     for tmp_x, tmp_y in mbg.minibatch_iterator(X, Y, 5, balanced=True):
-        print tmp_x, tmp_y
+        print(tmp_x, tmp_y)
 
 
 def test_threading():
@@ -149,7 +149,7 @@ def test_threading():
         time.sleep(delay)
 
     no_thread_time = time.time() - tic
-    print "Without threading", no_thread_time
+    print("Without threading", no_thread_time)
 
     # doing with threading:
     tic = time.time()
@@ -158,11 +158,11 @@ def test_threading():
         time.sleep(delay)
 
     thread_time = time.time() - tic
-    print "With threading", time.time() - tic
+    print("With threading", time.time() - tic)
 
     ratio = no_thread_time / thread_time
-    print ratio
-    print np.abs(ratio - 2.0)
+    print(ratio)
+    print(np.abs(ratio - 2.0))
     assert np.abs(ratio - 2.0) < 0.05
 
 

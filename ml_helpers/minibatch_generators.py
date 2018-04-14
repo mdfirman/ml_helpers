@@ -60,8 +60,8 @@ def balanced_idxs_iterator(Y, randomise=False, class_size='largest'):
 
     # number of loops is defined by the largest class size
     for _ in range(class_size_to_use):
-        for generator in generators.itervalues():
-            data_idx = generator.next()
+        for generator in generators.values():
+            data_idx = next(generator)
             yield data_idx
 
 
@@ -105,9 +105,9 @@ def minibatch_idx_iterator(
             num_to_iterate = len(Y)
 
         if randomise:
-            iterator = iter(np.random.permutation(xrange(num_to_iterate)))
+            iterator = iter(np.random.permutation(range(num_to_iterate)))
         else:
-            iterator = iter(range(num_to_iterate))
+            iterator = iter(list(range(num_to_iterate)))
 
     num_minibatches = int(
         np.ceil(float(num_to_iterate) / float(minibatch_size)))
@@ -135,8 +135,8 @@ def threaded_gen(generator, num_cached=1000):
         How many items to hold in the queue. More items means a higher load
         on the RAM.
     '''
-    import Queue
-    queue = Queue.Queue(maxsize=num_cached)
+    import queue
+    queue = queue.Queue(maxsize=num_cached)
     sentinel = object()  # guaranteed unique reference
 
     # define producer (putting items into queue)
@@ -212,9 +212,9 @@ def form_correct_shape_array(X):
     try:
         temp = np.concatenate(im_list, 3)
     except ValueError:
-        print "Could not concatenate arrays correctly"
+        print("Could not concatenate arrays correctly")
         for im in im_list:
-            print im.shape,
+            print(im.shape, end=' ')
         raise
 
     temp = temp.transpose((3, 2, 0, 1))

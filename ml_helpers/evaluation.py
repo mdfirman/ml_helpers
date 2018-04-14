@@ -181,7 +181,7 @@ def plot_confusion_matrix(y_true, y_pred, title='Confusion matrix',
     # compute confusion matrix
     if cls_labels is not None:
         # this is useful if not all classes are present in y_true/y_pred
-        cm = metrics.confusion_matrix(y_true, y_pred, range(len(cls_labels)))
+        cm = metrics.confusion_matrix(y_true, y_pred, list(range(len(cls_labels))))
     else:
         cm = metrics.confusion_matrix(y_true, y_pred)
     N = cm.shape[0]

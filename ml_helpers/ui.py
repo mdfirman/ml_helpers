@@ -26,7 +26,7 @@ def query_yes_no(question, default="yes"):
 
     while True:
         sys.stdout.write(question + prompt)
-        choice = raw_input().lower()
+        choice = input().lower()
         if default is not None and choice == '':
             return valid[default]
         elif choice in valid:
@@ -81,7 +81,7 @@ class TablePrinter(object):
             r += title.ljust(width) +  ' ' + self.sep + ' '
 
         r += '\n' + '-' * (sum(self.row_widths) + 3 * len(self.row_widths) + 1)
-        print r
+        print(r)
 
     def _str_repr(self, item):
         '''
@@ -116,7 +116,7 @@ class TablePrinter(object):
 
             r += self._str_repr(item).center(width) + ' | '
 
-        print r
+        print(r)
 
 
 class Logger(object):
@@ -141,8 +141,9 @@ class Logger(object):
         pass
 
 
-def color_grid_vis(X, (nh, nw), save_path=None):
+def color_grid_vis(X, xxx_todo_changeme, save_path=None):
     '''https://github.com/Newmu/dcgan_code'''
+    (nh, nw) = xxx_todo_changeme
     h, w = X[0].shape[:2]
     img = np.zeros((h*nh, w*nw, 3))
     for n, x in enumerate(X):
